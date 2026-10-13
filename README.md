@@ -8,9 +8,9 @@ und PDF-Bericht ausgegeben.
 
 | Modul | Aufgabe |
 |---|---|
-| `surveys/schema.py` | Spalten, Datentypen, erlaubte Werte |
-| `surveys/importer.py` | CSV einlesen und bereinigen → `CleaningReport` |
-| `surveys/analysis.py` | Kennzahlen mit pandas → `Summary` |
+| `surveys/data/schema.py` | Spalten, Datentypen, erlaubte Werte |
+| `surveys/data/importer.py` | CSV einlesen und bereinigen → `CleaningReport` |
+| `surveys/data/analysis.py` | Kennzahlen mit pandas → `Summary` |
 | `surveys/services.py` | Upload speichern, Auswertung zwischenspeichern |
 | `surveys/views.py`, `api.py` | HTML-Seiten und JSON-API |
 | `surveys/charts.py`, `report.py` | Diagramme (matplotlib) und PDF (ReportLab) |

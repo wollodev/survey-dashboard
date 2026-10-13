@@ -3,7 +3,7 @@ import io
 import pandas as pd
 from django.test import SimpleTestCase
 
-from ..importer import SurveyImportError, normalize_region, read_and_clean
+from ..data.importer import SurveyImportError, normalize_region, read_and_clean
 from .samples import CSV, HEADER, row
 
 

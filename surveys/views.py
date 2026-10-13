@@ -4,9 +4,9 @@ from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
-from .analysis import Rows
+from .data.analysis import Rows
+from .data.importer import SurveyImportError
 from .forms import UploadForm
-from .importer import SurveyImportError
 from .models import SurveyUpload
 from .report import build_report
 from .services import create_survey, get_summary

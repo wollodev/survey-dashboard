@@ -3,8 +3,8 @@ import io
 import pandas as pd
 from django.test import SimpleTestCase
 
-from ..analysis import age_group_stats, kpis, net_promoter_score, summarize
-from ..importer import read_and_clean
+from ..data.analysis import age_group_stats, kpis, net_promoter_score, summarize
+from ..data.importer import read_and_clean
 from .samples import CSV, HEADER, row
 
 

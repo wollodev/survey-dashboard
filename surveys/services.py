@@ -4,8 +4,8 @@ from django.conf import settings
 from django.core.cache import cache
 from django.core.files.uploadedfile import UploadedFile
 
-from .analysis import Summary, load_survey, summarize
-from .importer import CleaningReport, read_and_clean, save_parquet
+from .data.analysis import Summary, load_survey, summarize
+from .data.importer import CleaningReport, read_and_clean, save_parquet
 from .models import SurveyUpload
 
 

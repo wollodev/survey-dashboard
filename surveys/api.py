@@ -11,7 +11,7 @@ from rest_framework.response import Response
 from rest_framework.throttling import AnonRateThrottle, BaseThrottle, ScopedRateThrottle
 from rest_framework.views import APIView
 
-from .importer import SurveyImportError
+from .data.importer import SurveyImportError
 from .models import SurveyUpload
 from .serializers import SurveyUploadSerializer, UploadSerializer
 from .services import create_survey, get_summary

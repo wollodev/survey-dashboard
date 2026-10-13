@@ -3,9 +3,9 @@ from datetime import UTC, datetime
 
 from django.test import SimpleTestCase
 
-from ..analysis import summarize
 from ..charts import brand_share_chart
-from ..importer import read_and_clean
+from ..data.analysis import summarize
+from ..data.importer import read_and_clean
 from ..report import build_report
 from .samples import CSV
 

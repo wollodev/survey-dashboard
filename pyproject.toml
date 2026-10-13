@@ -12,6 +12,7 @@ extend-select = [
     "DJ",   # Django
     "PD",   # pandas
     "RUF",  # ruff-specific rules
+    "TID251",  # banned imports (keeps surveys/data free of Django)
 ]
 ignore = [
     # Django and DRF expect lists as class attributes (Meta.ordering, fields, parser_classes, ...).
@@ -20,6 +21,14 @@ ignore = [
     "RUF001",
     "RUF003",
 ]
+
+[tool.ruff.lint.flake8-tidy-imports.banned-api]
+"django".msg = "surveys/data/ is pure pandas code and must not depend on Django."
+"rest_framework".msg = "surveys/data/ is pure pandas code and must not depend on Django."
+
+[tool.ruff.lint.per-file-ignores]
+# The import ban only applies inside surveys/data/.
+"!surveys/data/**" = ["TID251"]
 
 [tool.mypy]
 python_version = "3.12"

@@ -16,7 +16,7 @@ from datetime import datetime, timedelta
 
 from django.core.management.base import BaseCommand, CommandParser
 
-from ...schema import COLUMN_TYPES
+from ...data.schema import COLUMN_TYPES
 
 BRANDS = {
     # brand: (share, average satisfaction 1-5)

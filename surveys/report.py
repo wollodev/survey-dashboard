@@ -11,8 +11,8 @@ from reportlab.lib.units import cm
 from reportlab.lib.utils import ImageReader
 from reportlab.platypus import Image, KeepTogether, Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
 
-from .analysis import Summary
 from .charts import brand_share_chart, weekly_chart
+from .data.analysis import Summary
 
 LINE = colors.HexColor("#e3e2dd")
 HEADER_BG = colors.HexColor("#f6f6f4")

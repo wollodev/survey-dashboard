@@ -1,5 +1,7 @@
 # Survey Dashboard
 
+[![CI](https://github.com/wollodev/survey-dashboard/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/wollodev/survey-dashboard/actions/workflows/ci.yml?query=branch%3Amain)
+
 > **Demo project** – a small, cleanly structured application built with **Python, Django and pandas**.
 > All brands, people and answers are made up (`python manage.py generate_survey`).
 
@@ -55,6 +57,8 @@ python manage.py runserver
 `manage.py` uses `config.settings.dev`; `wsgi.py`/`asgi.py` use `config.settings.prod`.
 
 ### Checks
+
+The same checks run in GitHub Actions for every pull request and every push to `main` (`.github/workflows/ci.yml`).
 
 ```bash
 python manage.py test

@@ -1,0 +1,32 @@
+{% extends "surveys/base.html" %}
+
+{% block content %}
+  <h1>{{ upload.name }}</h1>
+
+  <a href="{% url 'api_survey_summary' upload.pk %}">Daten als JSON</a> ·
+  <a href="{% url 'survey_report' upload.pk %}">Bericht als PDF</a>
+
+  {% with k=summary.kpis %}
+  <div class="kpis">
+    <div class="card kpi"><div class="label">Antworten</div><div class="value">{{ k.responses }}</div></div>
+    <div class="card kpi">
+      <div class="label">Net Promoter Score</div>
+      <div class="value {% if k.nps >= 0 %}pos{% else %}neg{% endif %}">{{ k.nps|floatformat:1 }}</div>
+    </div>
+  </div>
+  {% endwith %}
+
+  <div class="card">
+    <h2>Marken</h2>
+    <table>
+      {% for b in summary.brands %}
+        <tr>
+          <td>{{ b.brand }}</td>
+          <td><div class="bar"><span style="width: {% widthratio b.share brand_max 100 %}%"></span></div></td>
+          <td class="num">{{ b.share|floatformat:1 }}</td>
+          <td class="num">{{ b.nps|floatformat:1|default:"–" }}</td>
+        </tr>
+      {% endfor %}
+    </table>
+  </div>
+{% endblock %}

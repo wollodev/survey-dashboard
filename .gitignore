@@ -1,0 +1,7 @@
+.venv/
+__pycache__/
+.ruff_cache/
+data/
+*.csv
+.env
+.DS_Store

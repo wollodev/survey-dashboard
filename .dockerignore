@@ -1,0 +1,15 @@
+.venv
+venv
+__pycache__
+*.pyc
+.git
+.DS_Store
+
+# Lokale Daten und Testdateien gehören nicht ins Image
+data
+*.csv
+
+# Entwicklungswerkzeuge
+.ruff_cache
+.vscode
+requirements-dev.txt

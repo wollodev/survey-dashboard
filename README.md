@@ -69,7 +69,19 @@ mypy .
 ## Docker
 
 ```bash
-cp .env.example .env    # set DJANGO_SECRET_KEY
+cp -n .env.example .env   # -n: never overwrites an existing .env
+```
+
+Then set `DJANGO_SECRET_KEY` in `.env` (copy the variables from `.env.example` if you already had a `.env`).
+Generate a key with:
+
+```bash
+python -c "import secrets; print(secrets.token_urlsafe(50))"
+```
+
+Start the app at http://localhost:8000:
+
+```bash
 docker compose up --build
 ```
 

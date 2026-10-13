@@ -1,12 +1,12 @@
 """
-Erzeugt eine fiktive Marktforschungsumfrage zum Kaffeekonsum als CSV.
+Generates a fictional market research survey on coffee consumption as CSV.
 
-Alle Marken, Personen und Antworten sind erfunden. Die Daten enthalten
-absichtlich typische Fehler aus echten Umfragen (Dubletten, fehlende Werte,
-Tippfehler, Ausreißer), damit es beim Bereinigen mit pandas etwas zu tun gibt.
+All brands, people and answers are made up. The data intentionally contains
+typical errors from real surveys (duplicates, missing values, typos, outliers)
+so there is something to clean up with pandas.
 
-Aufruf:
-    python manage.py generate_survey                 # 75.000 Zeilen nach survey.csv
+Usage:
+    python manage.py generate_survey                 # 75,000 rows to survey.csv
     python manage.py generate_survey --rows 120000 --out gross.csv
 """
 
@@ -19,7 +19,7 @@ from django.core.management.base import BaseCommand, CommandParser
 from ...schema import COLUMN_TYPES
 
 BRANDS = {
-    # Marke: (Anteil, durchschnittliche Zufriedenheit 1–5)
+    # brand: (share, average satisfaction 1-5)
     "Bohnenwerk": (0.24, 4.1),
     "Röstzeit": (0.22, 3.7),
     "Morgenrot": (0.18, 3.4),
@@ -28,7 +28,7 @@ BRANDS = {
 }
 
 REGIONS = {
-    # Bundesland: ungefährer Anteil an der Bevölkerung
+    # federal state: approximate share of the population
     "Nordrhein-Westfalen": 0.215,
     "Bayern": 0.158,
     "Baden-Württemberg": 0.134,
@@ -47,7 +47,7 @@ REGIONS = {
     "Bremen": 0.008,
 }
 
-# So tauchen manche Bundesländer in schlecht gepflegten Daten auf.
+# How some federal states show up in poorly maintained data.
 REGION_TYPOS = {
     "Nordrhein-Westfalen": ["NRW", "nordrhein-westfalen", "Nordrhein-Westfalen "],
     "Bayern": ["bayern", " Bayern"],
@@ -72,14 +72,14 @@ def pick(rng: random.Random, weights: dict) -> str:
 
 
 def week_weights(weeks: int) -> list[float]:
-    """Wie viele Antworten pro Woche eingehen: Anlauf, Newsletter-Spitze, langsames Abflauen."""
+    """How many responses arrive per week: ramp-up, newsletter spike, slow decline."""
     weights = []
     for week in range(weeks):
         weight = 1.0 - 0.02 * week
         if week < 3:
             weight *= (0.4, 0.7, 0.9)[week]
         if week == 11:
-            weight *= 2.2  # Newsletter mit Umfrage-Link
+            weight *= 2.2  # newsletter with survey link
         weights.append(weight)
     return weights
 
@@ -97,10 +97,10 @@ def make_row(rng: random.Random, response_id: int, start: datetime, weights: lis
     channel = pick(rng, channel_weights)
 
     brand = rng.choices(list(BRANDS), weights=[share for share, _ in BRANDS.values()])[0]
-    base = BRANDS[brand][1] + (age - 45) * 0.008  # Ältere sind etwas zufriedener
+    base = BRANDS[brand][1] + (age - 45) * 0.008  # older people are slightly more satisfied
     satisfaction = min(5, max(1, round(rng.gauss(base, 0.9))))
 
-    # Wer zufrieden ist, empfiehlt eher weiter (0–10).
+    # Satisfied customers are more likely to recommend (0-10).
     nps = min(10, max(0, round(satisfaction * 2 - 0.5 + rng.gauss(0, 1.4))))
 
     cups = min(8, max(0, round(rng.gauss(2.6 if age > 30 else 1.9, 1.3))))
@@ -140,27 +140,27 @@ def make_row(rng: random.Random, response_id: int, start: datetime, weights: lis
 
 
 def add_noise(rng: random.Random, row: dict) -> dict:
-    """Baut typische Datenfehler ein."""
+    """Injects typical data errors."""
     if rng.random() < 0.02:
-        row["cups_per_day"] = ""  # nicht beantwortet
+        row["cups_per_day"] = ""  # not answered
     if rng.random() < 0.03:
-        row["monthly_spend_eur"] = ""  # nicht beantwortet
+        row["monthly_spend_eur"] = ""  # not answered
     if rng.random() < 0.001:
-        row["monthly_spend_eur"] = 9999.0  # Tippfehler bei der Eingabe
+        row["monthly_spend_eur"] = 9999.0  # typo during data entry
     if rng.random() < 0.001:
-        row["nps_score"] = 99  # ungültiger Wert
+        row["nps_score"] = 99  # invalid value
     if rng.random() < 0.0005:
-        row["submitted_at"] = "unbekannt"  # kaputtes Datum
+        row["submitted_at"] = "unbekannt"  # broken date
     if row["region"] in REGION_TYPOS and rng.random() < 0.04:
         row["region"] = rng.choice(REGION_TYPOS[row["region"]])
     return row
 
 
 def write_survey(path: str, rows: int, seed: int) -> int:
-    """Schreibt die Umfrage als CSV und gibt die Anzahl geschriebener Zeilen zurück."""
+    """Writes the survey as CSV and returns the number of rows written."""
     rng = random.Random(seed)
-    start = datetime(2026, 3, 2)  # noqa: DTZ001 – ein Montag; die Umfrage speichert Ortszeit ohne Zeitzone
-    weights = week_weights(26)  # 26 Wochen, März bis August
+    start = datetime(2026, 3, 2)  # noqa: DTZ001 - a Monday; the survey stores local time without a time zone
+    weights = week_weights(26)  # 26 weeks, March to August
 
     written = 0
     with open(path, "w", newline="", encoding="utf-8") as f:
@@ -170,7 +170,7 @@ def write_survey(path: str, rows: int, seed: int) -> int:
             row = add_noise(rng, make_row(rng, 100_001 + i, start, weights))
             writer.writerow(row)
             written += 1
-            if rng.random() < 0.005:  # doppelt abgeschickt
+            if rng.random() < 0.005:  # submitted twice
                 writer.writerow(row)
                 written += 1
     return written

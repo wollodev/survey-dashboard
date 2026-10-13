@@ -1,4 +1,4 @@
-"""PDF-Bericht mit ReportLab."""
+"""PDF report with ReportLab."""
 
 import io
 from datetime import datetime
@@ -19,7 +19,7 @@ HEADER_BG = colors.HexColor("#f6f6f4")
 
 
 def _table(rows: list[list], col_widths: list[float]) -> Table:
-    """Tabelle mit Kopfzeile, Linien und rechtsbündigen Zahlenspalten."""
+    """Table with header row, rules and right-aligned number columns."""
     table = Table(rows, colWidths=col_widths, hAlign="LEFT")
     table.setStyle(
         TableStyle(
@@ -38,7 +38,7 @@ def _table(rows: list[list], col_widths: list[float]) -> Table:
 
 
 def _chart(png: bytes, width: float) -> Image:
-    """Bild in fester Breite, die Höhe ergibt sich aus dem Seitenverhältnis."""
+    """Image at a fixed width; the height follows from the aspect ratio."""
     pixel_width, pixel_height = ImageReader(io.BytesIO(png)).getSize()
     return Image(io.BytesIO(png), width=width, height=width * pixel_height / pixel_width)
 
@@ -46,7 +46,7 @@ def _chart(png: bytes, width: float) -> Image:
 def build_report(
     title: str, uploaded_at: datetime, summary: Summary, created_at: datetime | None = None
 ) -> bytes:
-    """Baut den Bericht und gibt das fertige PDF als Bytes zurück."""
+    """Builds the report and returns the finished PDF as bytes."""
     created_at = created_at or datetime.now().astimezone()
     styles = getSampleStyleSheet()
     k = summary["kpis"]
@@ -88,7 +88,7 @@ def build_report(
             col_widths=[5 * cm, 2.8 * cm, 2.6 * cm, 2.8 * cm, 2.4 * cm],
         ),
         Spacer(1, 0.4 * cm),
-        # KeepTogether: Überschrift und Diagramm nie auf zwei Seiten verteilen
+        # KeepTogether: never split heading and chart across two pages
         KeepTogether(
             [
                 Paragraph("Antworten pro Woche", styles["Heading2"]),

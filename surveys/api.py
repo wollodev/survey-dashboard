@@ -1,4 +1,4 @@
-"""JSON-API mit Django REST Framework."""
+"""JSON API with Django REST Framework."""
 
 from dataclasses import asdict
 
@@ -18,13 +18,13 @@ from .services import create_survey, get_summary
 
 
 class SurveyListCreateView(APIView):
-    """GET /api/surveys/ listet alle Uploads, POST lädt eine neue CSV hoch."""
+    """GET /api/surveys/ lists all uploads, POST uploads a new CSV."""
 
     parser_classes = [MultiPartParser]
     throttle_scope = "uploads"
 
     def get_throttles(self):
-        # Uploads sind teuer und bekommen ein eigenes, strengeres Limit.
+        # Uploads are expensive and get their own, stricter limit.
         if self.request.method == "POST":
             return [ScopedRateThrottle()]
         return [AnonRateThrottle()]
@@ -50,7 +50,7 @@ class SurveyListCreateView(APIView):
 
 
 class SurveySummaryView(APIView):
-    """GET /api/surveys/<id>/summary/ liefert alle Kennzahlen als JSON."""
+    """GET /api/surveys/<id>/summary/ returns all metrics as JSON."""
 
     def get(self, request: Request, pk: int) -> Response:
         upload = get_object_or_404(SurveyUpload, pk=pk)

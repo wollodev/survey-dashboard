@@ -5,18 +5,18 @@ extend-exclude = ["*/migrations/*"]
 
 [tool.ruff.lint]
 extend-select = [
-    "I",    # Import-Reihenfolge
-    "B",    # typische Fehlerquellen (bugbear)
-    "UP",   # moderne Python-Syntax
-    "SIM",  # Vereinfachungen
+    "I",    # import order
+    "B",    # common bug sources (bugbear)
+    "UP",   # modern Python syntax
+    "SIM",  # simplifications
     "DJ",   # Django
     "PD",   # pandas
-    "RUF",  # ruff-eigene Regeln
+    "RUF",  # ruff-specific rules
 ]
 ignore = [
-    # Django und DRF erwarten Listen als Klassenattribute (Meta.ordering, fields, parser_classes, ...).
+    # Django and DRF expect lists as class attributes (Meta.ordering, fields, parser_classes, ...).
     "RUF012",
-    # Gedankenstriche (–) sind in deutschen Texten gewollt.
+    # En dashes (–) are intentional in German UI text.
     "RUF001",
     "RUF003",
 ]

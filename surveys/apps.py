@@ -6,7 +6,7 @@ class SurveysConfig(AppConfig):
     name = "surveys"
 
     def ready(self) -> None:
-        from . import signals  # noqa: F401 – registriert die Signal-Handler
+        from . import signals  # noqa: F401 - registers the signal handlers
 
-        # SQLite und die Parquet-Dateien brauchen einen existierenden Datenordner.
+        # SQLite and the Parquet files need an existing data directory.
         settings.SURVEY_FILES_DIR.mkdir(parents=True, exist_ok=True)

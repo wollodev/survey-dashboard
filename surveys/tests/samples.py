@@ -1,11 +1,11 @@
-"""Kleine Beispiel-CSVs für die Tests."""
+"""Small sample CSVs for the tests."""
 
 HEADER = (
     "response_id,submitted_at,age,gender,region,income_band,cups_per_day,"
     "preferred_brand,channel,monthly_spend_eur,satisfaction,nps_score,would_subscribe\n"
 )
 
-# 5 Zeilen: eine Dublette, ein kaputtes Datum, zwei Ausreißer (Ausgaben 9999, NPS 99).
+# 5 rows: one duplicate, one broken date, two outliers (spend 9999, NPS 99).
 CSV = HEADER + (
     "1,2026-03-02 10:00:00,25,weiblich,Berlin,keine Angabe,2,Bohnenwerk,Abo,30.5,5,10,ja\n"
     "2,2026-03-03 11:00:00,40,männlich,Bayern,keine Angabe,3,Röstzeit,Supermarkt,12.0,3,6,nein\n"
@@ -16,7 +16,7 @@ CSV = HEADER + (
 
 
 def row(response_id: int, **values: object) -> str:
-    """Eine gültige CSV-Zeile; einzelne Werte lassen sich überschreiben."""
+    """A valid CSV row; individual values can be overridden."""
     defaults: dict[str, object] = {
         "submitted_at": "2026-03-02 10:00:00",
         "age": 30,

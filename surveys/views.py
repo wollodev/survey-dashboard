@@ -1,4 +1,4 @@
-"""HTML-Seiten mit Django-Templates."""
+"""HTML pages with Django templates."""
 
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -13,12 +13,12 @@ from .services import create_survey, get_summary
 
 
 def _largest(rows: Rows, key: str) -> float:
-    """Größter Wert einer Spalte, damit der längste Balken die volle Breite bekommt."""
+    """Largest value of a column, so the longest bar gets the full width."""
     return max((row[key] for row in rows if row[key] is not None), default=1) or 1
 
 
 def survey_list(request: HttpRequest) -> HttpResponse:
-    """Startseite: alle Umfragen und das Upload-Formular."""
+    """Start page: all surveys and the upload form."""
     form = UploadForm(request.POST or None, request.FILES or None)
     if request.method == "POST" and form.is_valid():
         try:
@@ -31,7 +31,7 @@ def survey_list(request: HttpRequest) -> HttpResponse:
 
 
 def dashboard(request: HttpRequest, pk: int) -> HttpResponse:
-    """Dashboard einer Umfrage."""
+    """Dashboard of a survey."""
     upload = get_object_or_404(SurveyUpload, pk=pk)
     summary = get_summary(upload)
     context = {
@@ -46,7 +46,7 @@ def dashboard(request: HttpRequest, pk: int) -> HttpResponse:
 
 
 def survey_report(request: HttpRequest, pk: int) -> HttpResponse:
-    """PDF-Bericht einer Umfrage zum Herunterladen."""
+    """Downloadable PDF report of a survey."""
     upload = get_object_or_404(SurveyUpload, pk=pk)
     pdf = build_report(
         title=upload.name,

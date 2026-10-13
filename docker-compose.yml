@@ -4,7 +4,7 @@ services:
     ports:
       - "8000:8000"
     environment:
-      # Werte kommen aus der Datei .env (Vorlage: .env.example).
+      # Values come from the .env file (template: .env.example).
       DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:?DJANGO_SECRET_KEY in .env setzen}
       DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:-localhost,127.0.0.1}
     volumes:

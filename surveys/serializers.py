@@ -5,7 +5,7 @@ from .validators import validate_csv_upload
 
 
 class SurveyUploadSerializer(serializers.ModelSerializer):
-    """Ausgabe: die Metadaten eines Uploads."""
+    """Output: the metadata of an upload."""
 
     class Meta:
         model = SurveyUpload
@@ -13,7 +13,7 @@ class SurveyUploadSerializer(serializers.ModelSerializer):
 
 
 class UploadSerializer(serializers.Serializer):
-    """Eingabe: die hochgeladene CSV-Datei und ein optionaler Name."""
+    """Input: the uploaded CSV file and an optional name."""
 
     file = serializers.FileField(validators=[validate_csv_upload])
     name = serializers.CharField(max_length=200, required=False, allow_blank=True)

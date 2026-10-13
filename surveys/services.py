@@ -1,4 +1,4 @@
-"""Anwendungslogik zwischen Views/API und den pandas-Modulen."""
+"""Application logic between the views/API and the pandas modules."""
 
 from django.conf import settings
 from django.core.cache import cache
@@ -10,7 +10,7 @@ from .models import SurveyUpload
 
 
 def create_survey(csv_file: UploadedFile, name: str | None) -> tuple[SurveyUpload, CleaningReport]:
-    """Liest, bereinigt und speichert eine CSV. Wirft SurveyImportError bei ungültigen Dateien."""
+    """Reads, cleans and stores a CSV. Raises SurveyImportError for invalid files."""
     df, report = read_and_clean(csv_file)
     filename = save_parquet(df, settings.SURVEY_FILES_DIR)
     try:
@@ -18,14 +18,14 @@ def create_survey(csv_file: UploadedFile, name: str | None) -> tuple[SurveyUploa
             name=name or csv_file.name or "Umfrage", data_file=filename, row_count=len(df)
         )
     except Exception:
-        # Ohne Datenbankeintrag würde die Datei nie wieder gefunden: aufräumen.
+        # Without a database row the file would never be found again: clean up.
         (settings.SURVEY_FILES_DIR / filename).unlink(missing_ok=True)
         raise
     return upload, report
 
 
 def get_summary(upload: SurveyUpload) -> Summary:
-    """Kennzahlen einer Umfrage. Uploads ändern sich nie, daher wird das Ergebnis zwischengespeichert."""
+    """Metrics of a survey. Uploads never change, so the result is cached."""
     key = f"survey-summary:{upload.data_file}"
     summary: Summary | None = cache.get(key)
     if summary is None:

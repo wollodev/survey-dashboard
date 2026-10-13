@@ -10,7 +10,7 @@ from .samples import CSV, HEADER, row
 
 class NetPromoterScoreTests(SimpleTestCase):
     def test_promoters_minus_detractors(self):
-        # 2 Promotoren (10, 9), 1 Kritiker (0) von 4 -> 50 % - 25 % = 25
+        # 2 promoters (10, 9), 1 detractor (0) out of 4 -> 50 % - 25 % = 25
         self.assertEqual(net_promoter_score(pd.Series([10, 9, 8, 0])), 25.0)
 
     def test_ignores_missing_values(self):
@@ -29,7 +29,7 @@ class SummaryTests(SimpleTestCase):
         self.assertEqual(summary["brands"][0]["responses"], 2)
 
     def test_age_groups_use_real_nps(self):
-        # Promotor (10) und Kritiker (0) in derselben Altersgruppe -> NPS 0, nicht der Mittelwert 5.
+        # Promoter (10) and detractor (0) in the same age group -> NPS 0, not the mean of 5.
         df, _ = read_and_clean(io.StringIO(HEADER + row(1, nps_score=10) + row(2, nps_score=0)))
         groups = age_group_stats(df)
         self.assertEqual(groups.loc[0, "age_group"], "30–39")

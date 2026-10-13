@@ -5,9 +5,7 @@ from django.db import models
 
 
 class SurveyUpload(models.Model):
-    """
-    Eine hochgeladene Umfrage. Die Daten selbst liegen als Parquet-Datei daneben.
-    """
+    """An uploaded survey. The data itself is stored alongside as a Parquet file."""
 
     name = models.CharField(max_length=200)
     data_file = models.CharField(max_length=100, unique=True)

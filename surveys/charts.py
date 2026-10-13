@@ -1,4 +1,4 @@
-"""Diagramme mit matplotlib, als PNG-Bytes für den PDF-Bericht."""
+"""Charts with matplotlib, as PNG bytes for the PDF report."""
 
 import io
 from datetime import date
@@ -10,14 +10,14 @@ MUTED = "#6b6b66"
 
 
 def _to_png(fig: Figure) -> bytes:
-    """Zeichnet die Figure in den Speicher statt in eine Datei."""
+    """Renders the figure into memory instead of a file."""
     buffer = io.BytesIO()
     fig.savefig(buffer, format="png", dpi=200, bbox_inches="tight")
     return buffer.getvalue()
 
 
 def _style(ax) -> None:
-    """Schlichter Stil: keine Rahmen oben/rechts, graue Beschriftung."""
+    """Plain style: no top/right spines, grey labels."""
     for side in ("top", "right"):
         ax.spines[side].set_visible(False)
     ax.set_facecolor("white")
@@ -27,14 +27,14 @@ def _style(ax) -> None:
 
 
 def brand_share_chart(brands: list[dict]) -> bytes:
-    """Waagerechte Balken: Anteil der Antworten je Marke."""
+    """Horizontal bars: share of responses per brand."""
     fig = Figure(figsize=(7, 3), facecolor="white")
     ax = fig.subplots()
     _style(ax)
     if not brands:
         return _to_png(fig)
 
-    names = [b["brand"] for b in brands][::-1]  # größte Marke oben
+    names = [b["brand"] for b in brands][::-1]  # largest brand on top
     shares = [b["share"] for b in brands][::-1]
 
     bars = ax.barh(names, shares, color=ACCENT)
@@ -45,7 +45,7 @@ def brand_share_chart(brands: list[dict]) -> bytes:
 
 
 def weekly_chart(weekly: list[dict]) -> bytes:
-    """Linie: Antworten pro Woche."""
+    """Line: responses per week."""
     weeks = [date.fromisoformat(w["week"]).strftime("%d.%m.") for w in weekly]  # "2026-03-02" -> "02.03."
     counts = [w["responses"] for w in weekly]
 
@@ -54,7 +54,7 @@ def weekly_chart(weekly: list[dict]) -> bytes:
     ax.plot(weeks, counts, color=ACCENT, linewidth=2, marker="o", markersize=3)
     ax.set_ylabel("Antworten", fontsize=9, color=MUTED)
     ax.set_ylim(bottom=0)
-    ax.set_xticks(range(0, len(weeks), 4))  # nur jede vierte Woche beschriften
+    ax.set_xticks(range(0, len(weeks), 4))  # label only every fourth week
     ax.grid(axis="y", color="#e3e2dd", linewidth=0.8)
     _style(ax)
     return _to_png(fig)

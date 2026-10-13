@@ -9,7 +9,7 @@ from .samples import CSV
 
 
 class SurveyTestCase(TestCase):
-    """Parquet-Dateien landen in einem temporären Ordner, nicht in data/."""
+    """Parquet files go to a temporary directory, not to data/."""
 
     def setUp(self):
         tmp = tempfile.TemporaryDirectory()
@@ -18,7 +18,7 @@ class SurveyTestCase(TestCase):
         override = override_settings(SURVEY_FILES_DIR=self.files_dir)
         override.enable()
         self.addCleanup(override.disable)
-        # Zwischengespeicherte Auswertungen und Upload-Limits nicht zwischen Tests teilen.
+        # Don't share cached summaries and upload rate limits between tests.
         cache.clear()
 
     def csv_file(self, filename="test.csv", content=CSV):

@@ -5,11 +5,11 @@ __pycache__
 .git
 .DS_Store
 
-# Lokale Daten und Testdateien gehören nicht ins Image
+# Local data and test files don't belong in the image
 data
 *.csv
 
-# Entwicklungswerkzeuge
+# Development tools
 .ruff_cache
 .vscode
 requirements-dev.txt

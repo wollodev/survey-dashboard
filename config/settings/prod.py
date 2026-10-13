@@ -1,4 +1,4 @@
-"""Produktion (Standard für wsgi.py/asgi.py und den Docker-Container)."""
+"""Production (default for wsgi.py/asgi.py and the Docker container)."""
 
 import os
 
@@ -8,7 +8,7 @@ from .base import *
 
 DEBUG = False
 
-# Ohne eigenen Schlüssel lieber gar nicht starten als mit einem bekannten.
+# Better not to start at all than to start with a publicly known key.
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "")
 if not SECRET_KEY:
     raise ImproperlyConfigured("Die Umgebungsvariable DJANGO_SECRET_KEY muss gesetzt sein.")

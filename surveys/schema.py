@@ -1,11 +1,11 @@
-"""Aufbau einer Umfrage-CSV: Spalten, erlaubte Werte und feste Reihenfolgen.
+"""Structure of a survey CSV: columns, allowed values and fixed orderings.
 
-Importer, Auswertung und Tests beziehen sich alle auf diese Definitionen.
+The importer, the analysis and the tests all refer to these definitions.
 """
 
-# Spalte -> Datentyp beim Einlesen. Ganzzahlige Antworten werden zunächst als float64
-# gelesen: Das läuft bei Ausreißern wie 9999 nicht über (Int8 würde z. B. 300 still zu 44
-# machen) und fehlende Werte werden zu NaN. Nach der Prüfung folgt INTEGER_COLUMNS.
+# Column -> dtype when reading. Integer answers are read as float64 first: this doesn't
+# overflow on outliers like 9999 (Int8 would silently turn e.g. 300 into 44), and missing
+# values become NaN. After validation the columns are converted to INTEGER_COLUMNS.
 COLUMN_TYPES = {
     "response_id": "int64",
     "submitted_at": "str",
@@ -22,7 +22,7 @@ COLUMN_TYPES = {
     "would_subscribe": "str",
 }
 
-# Endgültiger Typ ganzzahliger Spalten. "Int8" (großes I) erlaubt fehlende Werte (pd.NA).
+# Final dtype of integer columns. "Int8" (capital I) allows missing values (pd.NA).
 INTEGER_COLUMNS = {
     "age": "Int8",
     "cups_per_day": "Int8",
@@ -30,7 +30,7 @@ INTEGER_COLUMNS = {
     "nps_score": "Int8",
 }
 
-# Erlaubte Wertebereiche (einschließlich). Alles außerhalb wird zu einem fehlenden Wert.
+# Allowed value ranges (inclusive). Anything outside becomes a missing value.
 VALID_RANGES = {
     "age": (18, 99),
     "cups_per_day": (0, 20),
@@ -39,10 +39,10 @@ VALID_RANGES = {
     "nps_score": (0, 10),
 }
 
-# Spalten mit wenigen, sich wiederholenden Werten -> Typ "category" spart viel Speicher.
+# Columns with few, repeating values -> dtype "category" saves a lot of memory.
 CATEGORY_COLUMNS = ["gender", "region", "income_band", "preferred_brand", "channel", "would_subscribe"]
 
-# Antwort in "would_subscribe", die als Zustimmung zählt.
+# Answer in "would_subscribe" that counts as yes.
 YES = "ja"
 
 REGIONS = [
@@ -64,7 +64,7 @@ REGIONS = [
     "Thüringen",
 ]
 
-# Abkürzungen und Schreibvarianten, jeweils kleingeschrieben.
+# Abbreviations and spelling variants, all lowercase.
 REGION_ALIASES = {
     "nrw": "Nordrhein-Westfalen",
     "bay": "Bayern",
@@ -87,6 +87,6 @@ REGION_ALIASES = {
 
 INCOME_ORDER = ["unter 1.500 €", "1.500–2.999 €", "3.000–4.499 €", "4.500 € und mehr", "keine Angabe"]
 
-# Altersklassen: (17, 29] = 18–29, ..., (69, 99] = 70+. Die Obergrenze passt zu VALID_RANGES.
+# Age bins: (17, 29] = 18-29, ..., (69, 99] = 70+. The upper bound matches VALID_RANGES.
 AGE_BINS = [17, 29, 39, 49, 59, 69, VALID_RANGES["age"][1]]
 AGE_LABELS = ["18–29", "30–39", "40–49", "50–59", "60–69", "70+"]

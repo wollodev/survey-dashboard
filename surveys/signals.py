@@ -7,6 +7,6 @@ from .models import SurveyUpload
 
 @receiver(post_delete, sender=SurveyUpload)
 def delete_data_file(sender, instance: SurveyUpload, **kwargs) -> None:
-    """Parquet-Datei mitlöschen, aber erst wenn das Löschen in der Datenbank feststeht."""
+    """Delete the Parquet file too, but only once the database deletion is committed."""
     path = instance.data_path
     transaction.on_commit(lambda: path.unlink(missing_ok=True))

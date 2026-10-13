@@ -22,7 +22,7 @@ class ViewTests(SurveyTestCase):
         response = self.client.get(reverse("dashboard", args=[survey_id]))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Bohnenwerk")
-        self.assertContains(response, "Hessen")  # Bundesländer werden angezeigt
+        self.assertContains(response, "Hessen")  # federal states are shown
 
     def test_pdf_report(self):
         survey_id = self.upload().json()["survey"]["id"]

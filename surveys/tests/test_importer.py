@@ -23,7 +23,7 @@ class ReadAndCleanTests(SimpleTestCase):
             read_and_clean(io.StringIO("response_id,age\n1,30\n"))
 
     def test_large_outliers_do_not_overflow(self):
-        # Mit Int8 beim Einlesen wurde 300 still zu 44, ein scheinbar gültiges Alter.
+        # Reading as Int8 silently turned 300 into 44, a seemingly valid age.
         csv = HEADER + row(1, age=300) + row(2, age=150) + row(3, age=45)
         df, report = read_and_clean(io.StringIO(csv))
         self.assertTrue(df["age"].iloc[:2].isna().all())

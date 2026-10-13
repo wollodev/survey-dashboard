@@ -98,3 +98,7 @@ curl -F "file=@survey.csv" http://localhost:8000/api/surveys/
 ```
 
 Other pages: `/surveys/<id>/` (dashboard) and `/surveys/<id>/report.pdf` (PDF report).
+
+## License
+
+[MIT](LICENSE) © 2026 Wolfgang Kluth

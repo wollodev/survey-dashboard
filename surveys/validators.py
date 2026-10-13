@@ -9,7 +9,7 @@ from django.template.defaultfilters import filesizeformat
 def validate_csv_upload(file: File) -> None:
     """Only accept .csv files up to MAX_UPLOAD_SIZE."""
     if not (file.name or "").lower().endswith(".csv"):
-        raise ValidationError("Bitte eine .csv-Datei hochladen.")
+        raise ValidationError("Please upload a .csv file.")
     if file.size is not None and file.size > settings.MAX_UPLOAD_SIZE:
         limit = filesizeformat(settings.MAX_UPLOAD_SIZE)
-        raise ValidationError(f"Die Datei ist größer als {limit}.")
+        raise ValidationError(f"The file is larger than {limit}.")

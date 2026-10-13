@@ -1,5 +1,5 @@
 """
-Generates a fictional market research survey on coffee consumption as CSV.
+Generates a fictional market research survey on coffee consumption in Germany as CSV.
 
 All brands, people and answers are made up. The data intentionally contains
 typical errors from real surveys (duplicates, missing values, typos, outliers)
@@ -24,44 +24,49 @@ BRANDS = {
     "Röstzeit": (0.22, 3.7),
     "Morgenrot": (0.18, 3.4),
     "Hafenkaffee": (0.14, 3.9),
-    "Eigenmarke": (0.22, 3.1),
+    "Private Label": (0.22, 3.1),
 }
 
 REGIONS = {
     # federal state: approximate share of the population
-    "Nordrhein-Westfalen": 0.215,
-    "Bayern": 0.158,
+    "North Rhine-Westphalia": 0.215,
+    "Bavaria": 0.158,
     "Baden-Württemberg": 0.134,
-    "Niedersachsen": 0.097,
-    "Hessen": 0.076,
-    "Rheinland-Pfalz": 0.049,
-    "Sachsen": 0.048,
+    "Lower Saxony": 0.097,
+    "Hesse": 0.076,
+    "Rhineland-Palatinate": 0.049,
+    "Saxony": 0.048,
     "Berlin": 0.045,
     "Schleswig-Holstein": 0.035,
     "Brandenburg": 0.030,
-    "Sachsen-Anhalt": 0.026,
-    "Thüringen": 0.025,
+    "Saxony-Anhalt": 0.026,
+    "Thuringia": 0.025,
     "Hamburg": 0.022,
-    "Mecklenburg-Vorpommern": 0.019,
+    "Mecklenburg-Western Pomerania": 0.019,
     "Saarland": 0.012,
     "Bremen": 0.008,
 }
 
 # How some federal states show up in poorly maintained data.
 REGION_TYPOS = {
-    "Nordrhein-Westfalen": ["NRW", "nordrhein-westfalen", "Nordrhein-Westfalen "],
-    "Bayern": ["bayern", " Bayern"],
+    "North Rhine-Westphalia": [
+        "NRW",
+        "Nordrhein-Westfalen",
+        "north rhine-westphalia",
+        "North Rhine-Westphalia ",
+    ],
+    "Bavaria": ["Bayern", "bavaria", " Bavaria"],
     "Baden-Württemberg": ["BW", "Baden-Wuerttemberg"],
     "Berlin": ["berlin", "Berlin "],
 }
 
-GENDERS = {"weiblich": 0.49, "männlich": 0.48, "divers": 0.01, "keine Angabe": 0.02}
+GENDERS = {"female": 0.49, "male": 0.48, "diverse": 0.01, "not specified": 0.02}
 INCOME_BANDS = {
-    "unter 1.500 €": 0.17,
-    "1.500–2.999 €": 0.33,
-    "3.000–4.499 €": 0.27,
-    "4.500 € und mehr": 0.15,
-    "keine Angabe": 0.08,
+    "under €1,500": 0.17,
+    "€1,500–2,999": 0.33,
+    "€3,000–4,499": 0.27,
+    "€4,500 and more": 0.15,
+    "not specified": 0.08,
 }
 
 COLUMNS = list(COLUMN_TYPES)
@@ -89,9 +94,9 @@ def make_row(rng: random.Random, response_id: int, start: datetime, weights: lis
     young = age < 35
 
     channel_weights = {
-        "Supermarkt": 0.40 if young else 0.52,
-        "Online-Shop": 0.26 if young else 0.16,
-        "Abo": 0.16 if young else 0.10,
+        "Supermarket": 0.40 if young else 0.52,
+        "Online shop": 0.26 if young else 0.16,
+        "Subscription": 0.16 if young else 0.10,
         "Café": 0.18 if young else 0.22,
     }
     channel = pick(rng, channel_weights)
@@ -106,18 +111,18 @@ def make_row(rng: random.Random, response_id: int, start: datetime, weights: lis
     cups = min(8, max(0, round(rng.gauss(2.6 if age > 30 else 1.9, 1.3))))
     income_band = pick(rng, INCOME_BANDS)
     income_factor = {
-        "unter 1.500 €": 0.7,
-        "1.500–2.999 €": 0.9,
-        "3.000–4.499 €": 1.1,
-        "4.500 € und mehr": 1.4,
+        "under €1,500": 0.7,
+        "€1,500–2,999": 0.9,
+        "€3,000–4,499": 1.1,
+        "€4,500 and more": 1.4,
     }
-    price_per_cup = {"Supermarkt": 0.22, "Online-Shop": 0.30, "Abo": 0.38, "Café": 2.90}[channel]
+    price_per_cup = {"Supermarket": 0.22, "Online shop": 0.30, "Subscription": 0.38, "Café": 2.90}[channel]
     spend = cups * 30 * price_per_cup * income_factor.get(income_band, 1.0) * rng.uniform(0.6, 1.3)
     spend = round(max(0.0, spend), 2)
 
-    subscribe_p = 0.12 + (0.18 if young else 0.0) + (0.35 if channel == "Abo" else 0.0)
+    subscribe_p = 0.12 + (0.18 if young else 0.0) + (0.35 if channel == "Subscription" else 0.0)
     roll = rng.random()
-    would_subscribe = "ja" if roll < subscribe_p else ("vielleicht" if roll < subscribe_p + 0.25 else "nein")
+    would_subscribe = "yes" if roll < subscribe_p else ("maybe" if roll < subscribe_p + 0.25 else "no")
 
     week = rng.choices(range(len(weights)), weights=weights)[0]
     submitted_at = start + timedelta(weeks=week, seconds=rng.randrange(7 * 24 * 3600))
@@ -150,7 +155,7 @@ def add_noise(rng: random.Random, row: dict) -> dict:
     if rng.random() < 0.001:
         row["nps_score"] = 99  # invalid value
     if rng.random() < 0.0005:
-        row["submitted_at"] = "unbekannt"  # broken date
+        row["submitted_at"] = "unknown"  # broken date
     if row["region"] in REGION_TYPOS and rng.random() < 0.04:
         row["region"] = rng.choice(REGION_TYPOS[row["region"]])
     return row
@@ -177,13 +182,13 @@ def write_survey(path: str, rows: int, seed: int) -> int:
 
 
 class Command(BaseCommand):
-    help = "Erzeugt eine fiktive Kaffee-Umfrage als CSV (mit absichtlichen Datenfehlern)."
+    help = "Generates a fictional coffee survey as CSV (with intentional data errors)."
 
     def add_arguments(self, parser: CommandParser) -> None:
-        parser.add_argument("--rows", type=int, default=75_000, help="Anzahl Antworten (Standard: 75000)")
-        parser.add_argument("--out", default="survey.csv", help="Zieldatei (Standard: survey.csv)")
-        parser.add_argument("--seed", type=int, default=42, help="Startwert für den Zufall")
+        parser.add_argument("--rows", type=int, default=75_000, help="number of responses (default: 75000)")
+        parser.add_argument("--out", default="survey.csv", help="output file (default: survey.csv)")
+        parser.add_argument("--seed", type=int, default=42, help="random seed (default: 42)")
 
     def handle(self, *args, rows: int, out: str, seed: int, **options) -> None:
         written = write_survey(out, rows, seed)
-        self.stdout.write(self.style.SUCCESS(f"{written} Zeilen nach {out} geschrieben."))
+        self.stdout.write(self.style.SUCCESS(f"Wrote {written} rows to {out}."))

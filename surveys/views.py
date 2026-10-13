@@ -57,5 +57,5 @@ def survey_report(request: HttpRequest, pk: int) -> HttpResponse:
     return HttpResponse(
         pdf,
         content_type="application/pdf",
-        headers={"Content-Disposition": f'attachment; filename="umfrage-{upload.pk}.pdf"'},
+        headers={"Content-Disposition": f'attachment; filename="survey-{upload.pk}.pdf"'},
     )

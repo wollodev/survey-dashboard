@@ -1,52 +1,60 @@
-# Umfrage-Dashboard
+# Survey Dashboard
 
-> **Demo-Projekt** – zeigt eine kleine, sauber strukturierte Anwendung mit **Python, Django und pandas**.
-> Alle Marken, Personen und Antworten sind erfunden (`python manage.py generate_survey`).
+> **Demo project** – a small, cleanly structured application built with **Python, Django and pandas**.
+> All brands, people and answers are made up (`python manage.py generate_survey`).
 
-Django-Anwendung zum Hochladen, Bereinigen und Auswerten von Umfrage-CSVs (Kaffeekonsum).
-Die Daten werden mit pandas bereinigt, als Parquet gespeichert und als Dashboard, JSON-API
-und PDF-Bericht ausgegeben.
+A Django application for uploading, cleaning and analysing survey CSVs (coffee consumption in Germany).
+The data is cleaned with pandas, stored as Parquet and presented as a dashboard, a JSON API
+and a PDF report.
 
 ## Screenshots
 
-**Übersicht** – alle Umfragen und Upload-Formular
+<table>
+  <tr>
+    <td align="center" width="33%">
+      <a href="docs/screenshots/list.png"><img src="docs/screenshots/list-thumb.png" alt="Survey list with upload form"></a><br>
+      <sub><b>Survey list</b> and upload form</sub>
+    </td>
+    <td align="center" width="33%">
+      <a href="docs/screenshots/dashboard.png"><img src="docs/screenshots/dashboard-thumb.png" alt="Dashboard of a survey"></a><br>
+      <sub><b>Dashboard</b> with KPIs, brands, trends and breakdowns</sub>
+    </td>
+    <td align="center" width="33%">
+      <a href="docs/screenshots/report.png"><img src="docs/screenshots/report-thumb.png" alt="Both pages of the PDF report"></a><br>
+      <sub><b>PDF report</b> (matplotlib + ReportLab)</sub>
+    </td>
+  </tr>
+</table>
 
-![Übersicht mit Upload-Formular und Liste der Umfragen](docs/screenshots/list.png)
+Click a thumbnail to see the full-size image.
 
-**Dashboard** – Kennzahlen, Marken, Zeitverlauf, Altersgruppen, Einkommen, Kanäle und Bundesländer
+## Structure
 
-![Dashboard einer Umfrage](docs/screenshots/dashboard.png)
-
-**PDF-Bericht** – erzeugt mit matplotlib und ReportLab
-
-![Beide Seiten des PDF-Berichts](docs/screenshots/report.png)
-
-## Aufbau
-
-| Modul | Aufgabe |
+| Module | Responsibility |
 |---|---|
-| `surveys/data/schema.py` | Spalten, Datentypen, erlaubte Werte |
-| `surveys/data/importer.py` | CSV einlesen und bereinigen → `CleaningReport` |
-| `surveys/data/analysis.py` | Kennzahlen mit pandas → `Summary` |
-| `surveys/services.py` | Upload speichern, Auswertung zwischenspeichern |
-| `surveys/views.py`, `api.py` | HTML-Seiten und JSON-API |
-| `surveys/charts.py`, `report.py` | Diagramme (matplotlib) und PDF (ReportLab) |
+| `surveys/data/schema.py` | Columns, dtypes, allowed values |
+| `surveys/data/importer.py` | Read and clean a CSV → `CleaningReport` |
+| `surveys/data/analysis.py` | Metrics with pandas → `Summary` |
+| `surveys/services.py` | Store uploads, cache summaries |
+| `surveys/views.py`, `api.py` | HTML pages and JSON API |
+| `surveys/charts.py`, `report.py` | Charts (matplotlib) and PDF (ReportLab) |
 
-Metadaten liegen in SQLite, die Umfragedaten als Parquet-Dateien – beides unter `DATA_DIR` (Standard: `data/`).
+`surveys/data/` is pure pandas code and must not import Django (enforced by ruff).
+Upload metadata lives in SQLite, the survey data in Parquet files – both under `DATA_DIR` (default: `data/`).
 
-## Lokal entwickeln
+## Local development
 
 ```bash
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements-dev.txt
 python manage.py migrate
-python manage.py generate_survey          # erzeugt survey.csv mit 75.000 Testantworten
+python manage.py generate_survey          # creates survey.csv with 75,000 test responses
 python manage.py runserver
 ```
 
-`manage.py` nutzt `config.settings.dev`, `wsgi.py`/`asgi.py` nutzen `config.settings.prod`.
+`manage.py` uses `config.settings.dev`; `wsgi.py`/`asgi.py` use `config.settings.prod`.
 
-### Prüfen
+### Checks
 
 ```bash
 python manage.py test
@@ -54,23 +62,23 @@ ruff check . && ruff format --check .
 mypy .
 ```
 
-## Mit Docker
+## Docker
 
 ```bash
-cp .env.example .env    # DJANGO_SECRET_KEY eintragen
+cp .env.example .env    # set DJANGO_SECRET_KEY
 docker compose up --build
 ```
 
 ## API
 
-| Methode | Pfad | Beschreibung |
+| Method | Path | Description |
 |---|---|---|
-| `GET` | `/api/surveys/` | alle Uploads |
-| `POST` | `/api/surveys/` | CSV hochladen (`file`, optional `name`), max. 20 pro Stunde und IP |
-| `GET` | `/api/surveys/<id>/summary/` | alle Kennzahlen als JSON |
+| `GET` | `/api/surveys/` | List all uploads |
+| `POST` | `/api/surveys/` | Upload a CSV (`file`, optional `name`), max. 20 per hour and IP |
+| `GET` | `/api/surveys/<id>/summary/` | All metrics as JSON |
 
 ```bash
 curl -F "file=@survey.csv" http://localhost:8000/api/surveys/
 ```
 
-Weitere Seiten: `/surveys/<id>/` (Dashboard) und `/surveys/<id>/report.pdf` (PDF-Bericht).
+Other pages: `/surveys/<id>/` (dashboard) and `/surveys/<id>/report.pdf` (PDF report).

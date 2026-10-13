@@ -63,11 +63,11 @@ CACHES = {"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"
 STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
-LANGUAGE_CODE = "de-de"
+LANGUAGE_CODE = "en-us"
 TIME_ZONE = "Europe/Berlin"
 USE_I18N = True
 USE_TZ = True
-USE_THOUSAND_SEPARATOR = True  # 74967 is rendered as 74.967 in templates
+USE_THOUSAND_SEPARATOR = True  # 74967 is rendered as 74,967 in templates
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 

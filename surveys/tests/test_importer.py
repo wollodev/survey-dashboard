@@ -39,8 +39,9 @@ class ReadAndCleanTests(SimpleTestCase):
 
 class NormalizeRegionTests(SimpleTestCase):
     def test_aliases_and_spelling_variants(self):
-        regions = pd.Series(["NRW", " bayern", "Baden-Wuerttemberg", "Atlantis"])
+        regions = pd.Series(["NRW", " bayern", "Baden-Wuerttemberg", "Thuringia", "Atlantis"])
         self.assertEqual(
-            normalize_region(regions).tolist()[:3], ["Nordrhein-Westfalen", "Bayern", "Baden-Württemberg"]
+            normalize_region(regions).tolist()[:4],
+            ["North Rhine-Westphalia", "Bavaria", "Baden-Württemberg", "Thuringia"],
         )
-        self.assertTrue(pd.isna(normalize_region(regions).iloc[3]))
+        self.assertTrue(pd.isna(normalize_region(regions).iloc[4]))

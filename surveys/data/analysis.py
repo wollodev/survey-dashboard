@@ -61,7 +61,7 @@ def net_promoter_score(scores: pd.Series) -> float | None:
 
 
 def yes_rate(answers: pd.Series) -> float:
-    """Share of "ja" (yes) answers in percent."""
+    """Share of "yes" answers in percent."""
     return float((answers == YES).mean() * 100)
 
 

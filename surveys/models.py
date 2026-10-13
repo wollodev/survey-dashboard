@@ -16,7 +16,7 @@ class SurveyUpload(models.Model):
         ordering = ["-uploaded_at"]
 
     def __str__(self) -> str:
-        return f"{self.name} ({self.row_count} Antworten)"
+        return f"{self.name} ({self.row_count} responses)"
 
     @property
     def data_path(self) -> Path:

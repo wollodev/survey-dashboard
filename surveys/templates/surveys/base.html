@@ -1,14 +1,14 @@
 {% load static %}
 <!doctype html>
-<html lang="de">
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{% block title %}Umfrage-Dashboard{% endblock %}</title>
+  <title>{% block title %}Survey Dashboard{% endblock %}</title>
   <link rel="stylesheet" href="{% static 'surveys/style.css' %}">
 </head>
 <body>
-  <header><a href="{% url 'survey_list' %}">Umfrage-Dashboard</a></header>
+  <header><a href="{% url 'survey_list' %}">Survey Dashboard</a></header>
   <main>{% block content %}{% endblock %}</main>
 </body>
 </html>

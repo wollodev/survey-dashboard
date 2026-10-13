@@ -17,7 +17,7 @@ extend-select = [
 ignore = [
     # Django and DRF expect lists as class attributes (Meta.ordering, fields, parser_classes, ...).
     "RUF012",
-    # En dashes (–) are intentional in German UI text.
+    # En dashes (–) are intentional in UI text, e.g. age groups like 18–29.
     "RUF001",
     "RUF003",
 ]

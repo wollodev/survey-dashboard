@@ -6,15 +6,15 @@ from .base import SurveyTestCase
 
 class ViewTests(SurveyTestCase):
     def test_upload_form_redirects_to_dashboard(self):
-        response = self.client.post(reverse("survey_list"), {"file": self.csv_file(), "name": "März"})
+        response = self.client.post(reverse("survey_list"), {"file": self.csv_file(), "name": "March survey"})
         upload = SurveyUpload.objects.get()
         self.assertRedirects(response, reverse("dashboard", args=[upload.pk]))
-        self.assertEqual(upload.name, "März")
+        self.assertEqual(upload.name, "March survey")
 
     def test_upload_form_shows_import_errors(self):
         response = self.client.post(reverse("survey_list"), {"file": self.csv_file(content="foo\n1\n")})
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "konnte nicht gelesen werden")
+        self.assertContains(response, "could not be read")
         self.assertFalse(SurveyUpload.objects.exists())
 
     def test_dashboard_page(self):
@@ -22,7 +22,7 @@ class ViewTests(SurveyTestCase):
         response = self.client.get(reverse("dashboard", args=[survey_id]))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Bohnenwerk")
-        self.assertContains(response, "Hessen")  # federal states are shown
+        self.assertContains(response, "Hesse")  # federal states are shown
 
     def test_pdf_report(self):
         survey_id = self.upload().json()["survey"]["id"]

@@ -43,49 +43,59 @@ VALID_RANGES = {
 CATEGORY_COLUMNS = ["gender", "region", "income_band", "preferred_brand", "channel", "would_subscribe"]
 
 # Answer in "would_subscribe" that counts as yes.
-YES = "ja"
+YES = "yes"
 
+# The 16 German federal states, by their English names.
 REGIONS = [
     "Baden-Württemberg",
-    "Bayern",
+    "Bavaria",
     "Berlin",
     "Brandenburg",
     "Bremen",
     "Hamburg",
-    "Hessen",
-    "Mecklenburg-Vorpommern",
-    "Niedersachsen",
-    "Nordrhein-Westfalen",
-    "Rheinland-Pfalz",
+    "Hesse",
+    "Lower Saxony",
+    "Mecklenburg-Western Pomerania",
+    "North Rhine-Westphalia",
+    "Rhineland-Palatinate",
     "Saarland",
-    "Sachsen",
-    "Sachsen-Anhalt",
+    "Saxony",
+    "Saxony-Anhalt",
     "Schleswig-Holstein",
-    "Thüringen",
+    "Thuringia",
 ]
 
-# Abbreviations and spelling variants, all lowercase.
+# German names, abbreviations and spelling variants, all lowercase.
 REGION_ALIASES = {
-    "nrw": "Nordrhein-Westfalen",
-    "bay": "Bayern",
-    "bw": "Baden-Württemberg",
+    "bayern": "Bavaria",
+    "hessen": "Hesse",
+    "niedersachsen": "Lower Saxony",
+    "mecklenburg-vorpommern": "Mecklenburg-Western Pomerania",
+    "nordrhein-westfalen": "North Rhine-Westphalia",
+    "rheinland-pfalz": "Rhineland-Palatinate",
+    "sachsen": "Saxony",
+    "sachsen-anhalt": "Saxony-Anhalt",
+    "thüringen": "Thuringia",
     "baden-wuerttemberg": "Baden-Württemberg",
-    "nds": "Niedersachsen",
-    "hes": "Hessen",
-    "rlp": "Rheinland-Pfalz",
-    "sac": "Sachsen",
+    "nrw": "North Rhine-Westphalia",
+    "bay": "Bavaria",
+    "bw": "Baden-Württemberg",
+    "nds": "Lower Saxony",
+    "hes": "Hesse",
+    "rlp": "Rhineland-Palatinate",
+    "sac": "Saxony",
     "ber": "Berlin",
     "sh": "Schleswig-Holstein",
     "bra": "Brandenburg",
-    "saa": "Sachsen-Anhalt",
-    "thü": "Thüringen",
+    "saa": "Saxony-Anhalt",
+    "thü": "Thuringia",
     "hh": "Hamburg",
-    "mv": "Mecklenburg-Vorpommern",
+    "mv": "Mecklenburg-Western Pomerania",
     "sl": "Saarland",
     "hb": "Bremen",
 }
 
-INCOME_ORDER = ["unter 1.500 €", "1.500–2.999 €", "3.000–4.499 €", "4.500 € und mehr", "keine Angabe"]
+INCOME_ORDER = ["under €1,500", "€1,500–2,999", "€3,000–4,499", "€4,500 and more", "not specified"]
 
 # Age bins: (17, 29] = 18-29, ..., (69, 99] = 70+. The upper bound matches VALID_RANGES.
 AGE_BINS = [17, 29, 39, 49, 59, 69, VALID_RANGES["age"][1]]

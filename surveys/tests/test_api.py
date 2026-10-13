@@ -21,7 +21,7 @@ class SurveyApiTests(SurveyTestCase):
     def test_upload_rejects_large_files(self):
         response = self.upload()
         self.assertEqual(response.status_code, 400)
-        self.assertIn("größer", response.json()["file"][0])
+        self.assertIn("larger", response.json()["file"][0])
 
     def test_upload_rejects_broken_csv(self):
         response = self.upload(content="foo,bar\n1,2\n")

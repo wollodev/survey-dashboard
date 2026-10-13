@@ -44,7 +44,7 @@ def read_and_clean(source: str | Path | IO) -> tuple[pd.DataFrame, CleaningRepor
     try:
         df = pd.read_csv(source, usecols=list(COLUMN_TYPES), dtype=COLUMN_TYPES)
     except ValueError as exc:  # missing columns, text in numeric columns, ...
-        raise SurveyImportError(f"CSV konnte nicht gelesen werden: {exc}") from exc
+        raise SurveyImportError(f"The CSV could not be read: {exc}") from exc
 
     report = CleaningReport(rows_read=len(df))
 
@@ -79,7 +79,7 @@ def read_and_clean(source: str | Path | IO) -> tuple[pd.DataFrame, CleaningRepor
     df[CATEGORY_COLUMNS] = df[CATEGORY_COLUMNS].astype("category")
 
     if df.empty:
-        raise SurveyImportError("Nach der Bereinigung ist keine Zeile übrig.")
+        raise SurveyImportError("No rows left after cleaning.")
 
     report.rows_saved = len(df)
     return df.reset_index(drop=True), report

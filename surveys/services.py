@@ -15,7 +15,7 @@ def create_survey(csv_file: UploadedFile, name: str | None) -> tuple[SurveyUploa
     filename = save_parquet(df, settings.SURVEY_FILES_DIR)
     try:
         upload = SurveyUpload.objects.create(
-            name=name or csv_file.name or "Umfrage", data_file=filename, row_count=len(df)
+            name=name or csv_file.name or "Survey", data_file=filename, row_count=len(df)
         )
     except Exception:
         # Without a database row the file would never be found again: clean up.

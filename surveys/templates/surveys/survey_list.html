@@ -1,32 +1,32 @@
 {% extends "surveys/base.html" %}
 
 {% block content %}
-  <h1>Umfragen</h1>
-  <p class="muted">Lade eine CSV hier oder über die API hoch, dann erscheint sie in der Liste.</p>
+  <h1>Surveys</h1>
+  <p class="muted">Upload a CSV here or via the API and it will appear in the list.</p>
 
   <div class="card stack">
-    <h2>Neue Umfrage hochladen</h2>
+    <h2>Upload a new survey</h2>
     <form method="post" enctype="multipart/form-data">
       {% csrf_token %}
       {{ form.as_p }}
-      <button type="submit">Hochladen</button>
+      <button type="submit">Upload</button>
     </form>
   </div>
 
   <div class="card">
     {% if uploads %}
       <table>
-        <tr><th>Name</th><th class="num">Antworten</th><th class="num">Hochgeladen</th></tr>
+        <tr><th>Name</th><th class="num">Responses</th><th class="num">Uploaded</th></tr>
         {% for upload in uploads %}
           <tr>
             <td><a href="{% url 'dashboard' upload.pk %}">{{ upload.name }}</a></td>
             <td class="num">{{ upload.row_count }}</td>
-            <td class="num">{{ upload.uploaded_at|date:"d.m.Y H:i" }}</td>
+            <td class="num">{{ upload.uploaded_at|date:"Y-m-d H:i" }}</td>
           </tr>
         {% endfor %}
       </table>
     {% else %}
-      <p>Noch keine Umfrage hochgeladen. Über die API geht es im Terminal so:</p>
+      <p>No surveys uploaded yet. To upload one via the API from a terminal:</p>
       <p><code>curl -F "file=@survey.csv" http://localhost:8000/api/surveys/</code></p>
     {% endif %}
   </div>

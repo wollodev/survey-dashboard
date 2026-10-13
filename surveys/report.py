@@ -43,6 +43,13 @@ def _chart(png: bytes, width: float) -> Image:
     return Image(io.BytesIO(png), width=width, height=width * pixel_height / pixel_width)
 
 
+def _num(value: float | None, digits: int = 0, suffix: str = "") -> str:
+    """Formats a number with thousands separators; missing values become a dash."""
+    if value is None:
+        return "–"
+    return f"{value:,.{digits}f}{suffix}"
+
+
 def build_report(
     title: str, uploaded_at: datetime, summary: Summary, created_at: datetime | None = None
 ) -> bytes:
@@ -52,36 +59,36 @@ def build_report(
     k = summary["kpis"]
 
     story = [
-        Paragraph(f"Umfrage-Auswertung: {escape(title)}", styles["Title"]),
+        Paragraph(f"Survey report: {escape(title)}", styles["Title"]),
         Paragraph(
-            f"Hochgeladen am {uploaded_at:%d.%m.%Y}, erstellt am {created_at:%d.%m.%Y %H:%M}",
+            f"Uploaded on {uploaded_at:%Y-%m-%d}, created on {created_at:%Y-%m-%d %H:%M}",
             styles["Normal"],
         ),
         Spacer(1, 0.6 * cm),
-        Paragraph("Kennzahlen", styles["Heading2"]),
+        Paragraph("Key figures", styles["Heading2"]),
         _table(
             [
-                ["Kennzahl", "Wert"],
-                ["Antworten", f"{k['responses']}"],
-                ["Zufriedenheit (1–5)", f"{k['avg_satisfaction']:.2f}"],
-                ["Net Promoter Score", "–" if k["nps"] is None else f"{k['nps']:.1f}"],
-                ["Ausgaben pro Monat (Ø)", f"{k['avg_monthly_spend']:.2f} €"],
-                ["Würde ein Abo abschließen", f"{k['subscribe_rate']:.1f} %"],
+                ["Metric", "Value"],
+                ["Responses", _num(k["responses"])],
+                ["Satisfaction (1–5)", _num(k["avg_satisfaction"], 2)],
+                ["Net Promoter Score", _num(k["nps"], 1)],
+                ["Monthly spend (avg.)", _num(k["avg_monthly_spend"], 2, " €")],
+                ["Would subscribe", _num(k["subscribe_rate"], 1, " %")],
             ],
             col_widths=[7 * cm, 4 * cm],
         ),
         Spacer(1, 0.4 * cm),
-        Paragraph("Marken", styles["Heading2"]),
+        Paragraph("Brands", styles["Heading2"]),
         _chart(brand_share_chart(summary["brands"]), width=16 * cm),
         _table(
-            [["Marke", "Antworten", "Anteil", "Zufriedenheit", "NPS"]]
+            [["Brand", "Responses", "Share", "Satisfaction", "NPS"]]
             + [
                 [
                     b["brand"],
-                    f"{b['responses']}",
-                    f"{b['share']:.1f} %",
-                    f"{b['avg_satisfaction']:.2f}",
-                    "–" if b["nps"] is None else f"{b['nps']:.1f}",
+                    _num(b["responses"]),
+                    _num(b["share"], 1, " %"),
+                    _num(b["avg_satisfaction"], 2),
+                    _num(b["nps"], 1),
                 ]
                 for b in summary["brands"]
             ],
@@ -91,7 +98,7 @@ def build_report(
         # KeepTogether: never split heading and chart across two pages
         KeepTogether(
             [
-                Paragraph("Antworten pro Woche", styles["Heading2"]),
+                Paragraph("Responses per week", styles["Heading2"]),
                 _chart(weekly_chart(summary["weekly"]), width=16 * cm),
             ]
         ),
@@ -101,7 +108,7 @@ def build_report(
     doc = SimpleDocTemplate(
         buffer,
         pagesize=A4,
-        title=f"Umfrage-Auswertung: {title}",
+        title=f"Survey report: {title}",
         leftMargin=2 * cm,
         rightMargin=2 * cm,
         topMargin=2 * cm,

@@ -1,20 +1,20 @@
 {% extends "surveys/base.html" %}
 
-{% block title %}{{ upload.name }} · Umfrage-Dashboard{% endblock %}
+{% block title %}{{ upload.name }} · Survey Dashboard{% endblock %}
 
 {% block content %}
   <h1>{{ upload.name }}</h1>
   <p class="muted">
-    Hochgeladen am {{ upload.uploaded_at|date:"d.m.Y H:i" }} ·
-    <a href="{% url 'api_survey_summary' upload.pk %}">Daten als JSON</a> ·
-    <a href="{% url 'survey_report' upload.pk %}">Bericht als PDF</a>
+    Uploaded {{ upload.uploaded_at|date:"Y-m-d H:i" }} ·
+    <a href="{% url 'api_survey_summary' upload.pk %}">Data as JSON</a> ·
+    <a href="{% url 'survey_report' upload.pk %}">Report as PDF</a>
   </p>
 
   {% with k=summary.kpis %}
   <div class="kpis">
-    <div class="card kpi"><div class="label">Antworten</div><div class="value">{{ k.responses }}</div></div>
+    <div class="card kpi"><div class="label">Responses</div><div class="value">{{ k.responses }}</div></div>
     <div class="card kpi">
-      <div class="label">Zufriedenheit (1–5)</div>
+      <div class="label">Satisfaction (1–5)</div>
       <div class="value">{{ k.avg_satisfaction|floatformat:2|default:"–" }}</div>
     </div>
     <div class="card kpi">
@@ -24,20 +24,20 @@
       </div>
     </div>
     <div class="card kpi">
-      <div class="label">Ausgaben pro Monat (Ø)</div>
+      <div class="label">Monthly spend (avg.)</div>
       <div class="value">{{ k.avg_monthly_spend|floatformat:2|default:"–" }} €</div>
     </div>
     <div class="card kpi">
-      <div class="label">Würde ein Abo abschließen</div>
+      <div class="label">Would subscribe</div>
       <div class="value">{{ k.subscribe_rate|floatformat:1|default:"–" }} %</div>
     </div>
   </div>
   {% endwith %}
 
   <div class="card stack">
-    <h2>Marken</h2>
+    <h2>Brands</h2>
     <table>
-      <tr><th>Marke</th><th></th><th class="num">Anteil %</th><th class="num">Zufriedenheit</th><th class="num">NPS</th></tr>
+      <tr><th>Brand</th><th></th><th class="num">Share %</th><th class="num">Satisfaction</th><th class="num">NPS</th></tr>
       {% for b in summary.brands %}
         <tr>
           <td>{{ b.brand }}</td>
@@ -51,7 +51,7 @@
   </div>
 
   <div class="card stack">
-    <h2>Antworten pro Woche</h2>
+    <h2>Responses per week</h2>
     <div class="weeks">
       {% for w in summary.weekly %}
         <div style="height: {% widthratio w.responses weekly_max 100 %}%" title="{{ w.week }}: {{ w.responses }}"></div>
@@ -65,9 +65,9 @@
 
   <div class="grid stack">
     <div class="card">
-      <h2>Altersgruppen</h2>
+      <h2>Age groups</h2>
       <table>
-        <tr><th>Alter</th><th class="num">Antworten</th><th class="num">NPS</th><th class="num">Abo %</th></tr>
+        <tr><th>Age</th><th class="num">Responses</th><th class="num">NPS</th><th class="num">Subscribe %</th></tr>
         {% for a in summary.age_groups %}
           <tr>
             <td>{{ a.age_group }}</td>
@@ -80,9 +80,9 @@
     </div>
 
     <div class="card">
-      <h2>Einkommen</h2>
+      <h2>Income</h2>
       <table>
-        <tr><th>Netto pro Monat</th><th class="num">Antworten</th><th class="num">Ausgaben (Median)</th></tr>
+        <tr><th>Net per month</th><th class="num">Responses</th><th class="num">Spend (median)</th></tr>
         {% for i in summary.income %}
           <tr>
             <td>{{ i.income_band }}</td>
@@ -94,7 +94,7 @@
     </div>
 
     <div class="card">
-      <h2>Einkaufskanäle</h2>
+      <h2>Purchase channels</h2>
       <table>
         {% for c in summary.channels %}
           <tr>
@@ -107,9 +107,9 @@
     </div>
 
     <div class="card wide">
-      <h2>Bundesländer</h2>
+      <h2>Federal states</h2>
       <table>
-        <tr><th>Bundesland</th><th></th><th class="num">Antworten</th><th class="num">Zufriedenheit</th></tr>
+        <tr><th>State</th><th></th><th class="num">Responses</th><th class="num">Satisfaction</th></tr>
         {% for r in summary.regions %}
           <tr>
             <td>{{ r.region }}</td>

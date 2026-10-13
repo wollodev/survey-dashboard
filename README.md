@@ -7,6 +7,20 @@ Django-Anwendung zum Hochladen, Bereinigen und Auswerten von Umfrage-CSVs (Kaffe
 Die Daten werden mit pandas bereinigt, als Parquet gespeichert und als Dashboard, JSON-API
 und PDF-Bericht ausgegeben.
 
+## Screenshots
+
+**Übersicht** – alle Umfragen und Upload-Formular
+
+![Übersicht mit Upload-Formular und Liste der Umfragen](docs/screenshots/list.png)
+
+**Dashboard** – Kennzahlen, Marken, Zeitverlauf, Altersgruppen, Einkommen, Kanäle und Bundesländer
+
+![Dashboard einer Umfrage](docs/screenshots/dashboard.png)
+
+**PDF-Bericht** – erzeugt mit matplotlib und ReportLab
+
+![Beide Seiten des PDF-Berichts](docs/screenshots/report.png)
+
 ## Aufbau
 
 | Modul | Aufgabe |

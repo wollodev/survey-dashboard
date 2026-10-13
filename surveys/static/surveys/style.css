@@ -30,3 +30,4 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; white-sp
 a { color: var(--accent); }
 code { background: #efeee9; padding: 1px 5px; border-radius: 4px; }
 .stack { margin-bottom: 16px; }
+.wide { grid-column: 1 / -1; }

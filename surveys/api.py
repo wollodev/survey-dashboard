@@ -8,7 +8,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.parsers import MultiPartParser
 from rest_framework.request import Request
 from rest_framework.response import Response
-from rest_framework.throttling import AnonRateThrottle, ScopedRateThrottle
+from rest_framework.throttling import AnonRateThrottle, BaseThrottle, ScopedRateThrottle
 from rest_framework.views import APIView
 
 from .importer import SurveyImportError
@@ -23,7 +23,7 @@ class SurveyListCreateView(APIView):
     parser_classes = [MultiPartParser]
     throttle_scope = "uploads"
 
-    def get_throttles(self):
+    def get_throttles(self) -> list[BaseThrottle]:
         # Uploads are expensive and get their own, stricter limit.
         if self.request.method == "POST":
             return [ScopedRateThrottle()]

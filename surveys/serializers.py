@@ -7,7 +7,8 @@ from .validators import validate_csv_upload
 class SurveyUploadSerializer(serializers.ModelSerializer):
     """Output: the metadata of an upload."""
 
-    class Meta:
+    # The DRF stubs declare a ModelSerializer.Meta that doesn't exist at runtime.
+    class Meta:  # pyright: ignore[reportIncompatibleVariableOverride]
         model = SurveyUpload
         fields = ["id", "name", "row_count", "uploaded_at"]
 

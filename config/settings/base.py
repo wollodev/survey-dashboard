@@ -1,21 +1,30 @@
+"""Gemeinsame Einstellungen. dev.py und prod.py ergänzen nur, was sich unterscheidet."""
+
 import os
 from pathlib import Path
 
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
-SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "dev-only-insecure-key-change-me")
-DEBUG = os.environ.get("DJANGO_DEBUG", "false").lower() == "true"
-ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
+
+def env_list(name: str, default: str) -> list[str]:
+    """Kommagetrennte Umgebungsvariable -> Liste ohne Leerzeichen und leere Einträge."""
+    return [item.strip() for item in os.environ.get(name, default).split(",") if item.strip()]
+
+
+ALLOWED_HOSTS = env_list("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1")
 
 INSTALLED_APPS = [
+    "django.contrib.staticfiles",
     "rest_framework",
     "surveys",
 ]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
 ROOT_URLCONF = "config.urls"
@@ -31,9 +40,8 @@ TEMPLATES = [
 ]
 
 # Alles, was die Anwendung speichert, liegt in einem Ordner.
-# Im Container wird dort ein Docker-Volume eingehängt.
+# Im Container wird dort ein Docker-Volume eingehängt. Angelegt wird er in SurveysConfig.ready().
 DATA_DIR = Path(os.environ.get("DATA_DIR", BASE_DIR / "data"))
-DATA_DIR.mkdir(parents=True, exist_ok=True)
 
 # Metadaten der Uploads (Name, Datum, Zeilenzahl) in SQLite ...
 DATABASES = {
@@ -49,6 +57,12 @@ SURVEY_FILES_DIR = DATA_DIR / "surveys"
 # Uploads bis 100 MB annehmen
 MAX_UPLOAD_SIZE = 100 * 1024 * 1024
 
+# Berechnete Auswertungen zwischenspeichern (Uploads ändern sich nie).
+CACHES = {"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}}
+
+STATIC_URL = "static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
 LANGUAGE_CODE = "de-de"
 TIME_ZONE = "Europe/Berlin"
 USE_I18N = True
@@ -62,4 +76,7 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.AllowAny"],
     "UNAUTHENTICATED_USER": None,
     "DEFAULT_RENDERER_CLASSES": ["rest_framework.renderers.JSONRenderer"],
+    # Schutz vor Missbrauch der offenen API: Anfragen pro IP-Adresse begrenzen.
+    "DEFAULT_THROTTLE_CLASSES": ["rest_framework.throttling.AnonRateThrottle"],
+    "DEFAULT_THROTTLE_RATES": {"anon": "120/minute", "uploads": "20/hour"},
 }

@@ -5,3 +5,7 @@ data/
 *.csv
 .env
 .DS_Store
+staticfiles/
+bericht.pdf
+brands.png
+.mypy_cache/

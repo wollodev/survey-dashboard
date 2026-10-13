@@ -1,32 +1,124 @@
 {% extends "surveys/base.html" %}
 
+{% block title %}{{ upload.name }} · Umfrage-Dashboard{% endblock %}
+
 {% block content %}
   <h1>{{ upload.name }}</h1>
-
-  <a href="{% url 'api_survey_summary' upload.pk %}">Daten als JSON</a> ·
-  <a href="{% url 'survey_report' upload.pk %}">Bericht als PDF</a>
+  <p class="muted">
+    Hochgeladen am {{ upload.uploaded_at|date:"d.m.Y H:i" }} ·
+    <a href="{% url 'api_survey_summary' upload.pk %}">Daten als JSON</a> ·
+    <a href="{% url 'survey_report' upload.pk %}">Bericht als PDF</a>
+  </p>
 
   {% with k=summary.kpis %}
   <div class="kpis">
     <div class="card kpi"><div class="label">Antworten</div><div class="value">{{ k.responses }}</div></div>
     <div class="card kpi">
+      <div class="label">Zufriedenheit (1–5)</div>
+      <div class="value">{{ k.avg_satisfaction|floatformat:2|default:"–" }}</div>
+    </div>
+    <div class="card kpi">
       <div class="label">Net Promoter Score</div>
-      <div class="value {% if k.nps >= 0 %}pos{% else %}neg{% endif %}">{{ k.nps|floatformat:1 }}</div>
+      <div class="value {% if k.nps is not None %}{% if k.nps >= 0 %}pos{% else %}neg{% endif %}{% endif %}">
+        {{ k.nps|floatformat:1|default:"–" }}
+      </div>
+    </div>
+    <div class="card kpi">
+      <div class="label">Ausgaben pro Monat (Ø)</div>
+      <div class="value">{{ k.avg_monthly_spend|floatformat:2|default:"–" }} €</div>
+    </div>
+    <div class="card kpi">
+      <div class="label">Würde ein Abo abschließen</div>
+      <div class="value">{{ k.subscribe_rate|floatformat:1|default:"–" }} %</div>
     </div>
   </div>
   {% endwith %}
 
-  <div class="card">
+  <div class="card stack">
     <h2>Marken</h2>
     <table>
+      <tr><th>Marke</th><th></th><th class="num">Anteil %</th><th class="num">Zufriedenheit</th><th class="num">NPS</th></tr>
       {% for b in summary.brands %}
         <tr>
           <td>{{ b.brand }}</td>
           <td><div class="bar"><span style="width: {% widthratio b.share brand_max 100 %}%"></span></div></td>
           <td class="num">{{ b.share|floatformat:1 }}</td>
+          <td class="num">{{ b.avg_satisfaction|floatformat:2|default:"–" }}</td>
           <td class="num">{{ b.nps|floatformat:1|default:"–" }}</td>
         </tr>
       {% endfor %}
     </table>
+  </div>
+
+  <div class="card stack">
+    <h2>Antworten pro Woche</h2>
+    <div class="weeks">
+      {% for w in summary.weekly %}
+        <div style="height: {% widthratio w.responses weekly_max 100 %}%" title="{{ w.week }}: {{ w.responses }}"></div>
+      {% endfor %}
+    </div>
+    <div class="axis">
+      <span>{{ summary.weekly.0.week }}</span>
+      {% with last=summary.weekly|last %}<span>{{ last.week }}</span>{% endwith %}
+    </div>
+  </div>
+
+  <div class="grid stack">
+    <div class="card">
+      <h2>Altersgruppen</h2>
+      <table>
+        <tr><th>Alter</th><th class="num">Antworten</th><th class="num">NPS</th><th class="num">Abo %</th></tr>
+        {% for a in summary.age_groups %}
+          <tr>
+            <td>{{ a.age_group }}</td>
+            <td class="num">{{ a.responses }}</td>
+            <td class="num">{{ a.nps|floatformat:1|default:"–" }}</td>
+            <td class="num">{{ a.subscribe_rate|floatformat:1 }}</td>
+          </tr>
+        {% endfor %}
+      </table>
+    </div>
+
+    <div class="card">
+      <h2>Einkommen</h2>
+      <table>
+        <tr><th>Netto pro Monat</th><th class="num">Antworten</th><th class="num">Ausgaben (Median)</th></tr>
+        {% for i in summary.income %}
+          <tr>
+            <td>{{ i.income_band }}</td>
+            <td class="num">{{ i.responses }}</td>
+            <td class="num">{{ i.median_spend|floatformat:2|default:"–" }} €</td>
+          </tr>
+        {% endfor %}
+      </table>
+    </div>
+
+    <div class="card">
+      <h2>Einkaufskanäle</h2>
+      <table>
+        {% for c in summary.channels %}
+          <tr>
+            <td>{{ c.channel }}</td>
+            <td><div class="bar"><span style="width: {% widthratio c.share channel_max 100 %}%"></span></div></td>
+            <td class="num">{{ c.share|floatformat:1 }} %</td>
+          </tr>
+        {% endfor %}
+      </table>
+    </div>
+
+    <div class="card">
+      <h2>Bundesländer</h2>
+      <table>
+        <tr><th>Bundesland</th><th></th><th class="num">Antworten</th><th class="num">Zufriedenheit</th></tr>
+        {% for r in summary.regions %}
+          <tr>
+            <td>{{ r.region }}</td>
+            <td><div class="bar"><span style="width: {% widthratio r.responses region_max 100 %}%"></span></div></td>
+            <td class="num">{{ r.responses }}</td>
+            <td class="num">{{ r.avg_satisfaction|floatformat:2|default:"–" }}</td>
+          </tr>
+        {% endfor %}
+      </table>
+    </div>
   </div>
 {% endblock %}

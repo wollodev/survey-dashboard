@@ -1,131 +1,87 @@
 """CSV einlesen, bereinigen und als Parquet speichern."""
 
-# Spalte -> Datentyp beim Einlesen.
-# "Int8" (großes I) ist ein ganzzahliger Typ, der fehlende Werte (pd.NA) erlaubt.
 import uuid
+from dataclasses import dataclass, field
 from pathlib import Path
-from typing import IO, Any
+from typing import IO
 
 import pandas as pd
 
-COLUMN_TYPES = {
-    "response_id": "int64",
-    "submitted_at": "str",
-    "age": "Int8",
-    "gender": "str",
-    "region": "str",
-    "income_band": "str",
-    "cups_per_day": "Int8",
-    "preferred_brand": "str",
-    "channel": "str",
-    "monthly_spend_eur": "float64",
-    "satisfaction": "Int8",
-    "nps_score": "Int8",
-    "would_subscribe": "str",
-}
-
-VALID_REGIONS = [
-    "Baden-Württemberg",
-    "Bayern",
-    "Berlin",
-    "Brandenburg",
-    "Bremen",
-    "Hamburg",
-    "Hessen",
-    "Mecklenburg-Vorpommern",
-    "Niedersachsen",
-    "Nordrhein-Westfalen",
-    "Rheinland-Pfalz",
-    "Saarland",
-    "Sachsen",
-    "Sachsen-Anhalt",
-    "Schleswig-Holstein",
-    "Thüringen",
-]
-
-# Abkürzungen und Schreibvarianten, jeweils kleingeschrieben
-REGION_ALIASES = {
-    "nrw": "Nordrhein-Westfalen",
-    "bay": "Bayern",
-    "bw": "Baden-Württemberg",
-    "baden-wuerttemberg": "Baden-Württemberg",
-    "nds": "Niedersachsen",
-    "hes": "Hessen",
-    "rlp": "Rheinland-Pfalz",
-    "sac": "Sachsen",
-    "ber": "Berlin",
-    "sh": "Schleswig-Holstein",
-    "bra": "Brandenburg",
-    "saa": "Sachsen-Anhalt",
-    "thü": "Thüringen",
-    "hh": "Hamburg",
-    "mv": "Mecklenburg-Vorpommern",
-    "sl": "Saarland",
-    "hb": "Bremen",
-}
-
-# Spalten mit wenigen, sich wiederholenden Werten -> Typ "category" spart viel Speicher.
-CATEGORY_COLUMNS = ["gender", "region", "income_band", "preferred_brand", "channel", "would_subscribe"]
-
-# Erlaubte Wertebereiche. Alles außerhalb wird zu einem fehlenden Wert.
-VALID_RANGES = {
-    "age": (18, 99),
-    "cups_per_day": (0, 20),
-    "monthly_spend_eur": (0, 1000),
-    "satisfaction": (1, 5),
-    "nps_score": (0, 10),
-}
+from .schema import (
+    CATEGORY_COLUMNS,
+    COLUMN_TYPES,
+    INTEGER_COLUMNS,
+    REGION_ALIASES,
+    REGIONS,
+    VALID_RANGES,
+)
 
 
 class SurveyImportError(Exception):
     """Die Datei ist keine gültige Umfrage-CSV."""
 
 
+@dataclass
+class CleaningReport:
+    """Was beim Bereinigen passiert ist; wird nach dem Upload angezeigt."""
+
+    rows_read: int = 0
+    duplicates_removed: int = 0
+    invalid_dates_removed: int = 0
+    values_set_missing: dict[str, int] = field(default_factory=dict)
+    unknown_regions: int = 0
+    rows_saved: int = 0
+
+
 def normalize_region(regions: pd.Series) -> pd.Series:
     """Bildet jede Schreibweise auf den korrekten Namen ab; Unbekanntes wird zu NA."""
-    lookup = {name.lower(): name for name in VALID_REGIONS} | REGION_ALIASES
+    lookup = {name.lower(): name for name in REGIONS} | REGION_ALIASES
     return regions.str.strip().str.lower().map(lookup)
 
 
-def read_and_clean(source: str | Path | IO) -> tuple[pd.DataFrame, dict]:
-    """Liest eine Umfrage-CSV und gibt (DateFrame, Bereinigungsbericht) zurück."""
-
+def read_and_clean(source: str | Path | IO) -> tuple[pd.DataFrame, CleaningReport]:
+    """Liest eine Umfrage-CSV und gibt (DataFrame, Bereinigungsbericht) zurück."""
     try:
         df = pd.read_csv(source, usecols=list(COLUMN_TYPES), dtype=COLUMN_TYPES)
     except ValueError as exc:  # fehlende Spalten, Text in Zahlenspalten, ...
-        raise SurveyImportError(f"CSV konte nicht gelesen werden: {exc}") from exc
+        raise SurveyImportError(f"CSV konnte nicht gelesen werden: {exc}") from exc
 
-    report: dict[str, Any] = {"rows_read": len(df)}
+    report = CleaningReport(rows_read=len(df))
 
     # 1. Dubletten: dieselbe Antwort wurde mehrfach abgeschickt.
     before = len(df)
     df = df.drop_duplicates(subset="response_id", keep="first")
-    report["duplicates_removed"] = before - len(df)
+    report.duplicates_removed = before - len(df)
 
     # 2. Zeitstempel umwandeln. Kaputte Werte werden zu NaT ("not a time") und fliegen raus.
-    df["submitted_at"] = pd.to_datetime(df["submitted_at"], errors="coerce")
-    invalid_dates = df["submitted_at"].isna()
-    df = df[~invalid_dates]
-    report["invalid_dates_removed"] = int(invalid_dates.sum())
+    submitted_at = pd.to_datetime(df["submitted_at"], errors="coerce")
+    invalid_dates = submitted_at.isna()
+    df = df.assign(submitted_at=submitted_at)[~invalid_dates]
+    report.invalid_dates_removed = int(invalid_dates.sum())
 
-    # 3. Werte außerhalb des erlaubten Bereichs auf "fehlend" setzen.
-    report["values_set_missing"] = {}
+    # 3. Werte außerhalb des erlaubten Bereichs (und Kommazahlen in Ganzzahl-Spalten) auf "fehlend" setzen.
     for column, (low, high) in VALID_RANGES.items():
-        out_of_range = df[column].notna() & ~df[column].between(low, high)
-        df.loc[out_of_range, column] = pd.NA
-        report["values_set_missing"][column] = int(out_of_range.sum())
+        values = df[column]
+        invalid = values.notna() & ~values.between(low, high)
+        if column in INTEGER_COLUMNS:
+            invalid |= values.notna() & (values % 1 != 0)
+        df[column] = values.mask(invalid)
+        report.values_set_missing[column] = int(invalid.sum())
+
+    # Jetzt passen alle Werte sicher in den kleinen Ganzzahl-Typ.
+    df = df.astype(INTEGER_COLUMNS)
 
     # 4. Bundesländer vereinheitlichen.
     df["region"] = normalize_region(df["region"])
-    report["unknown_regions"] = int(df["region"].isna().sum())
+    report.unknown_regions = int(df["region"].isna().sum())
 
-    # 5. Textspalten mit wenigen Ausprägungen als Kategorie speichern
+    # 5. Textspalten mit wenigen Ausprägungen als Kategorie speichern.
     df[CATEGORY_COLUMNS] = df[CATEGORY_COLUMNS].astype("category")
 
     if df.empty:
         raise SurveyImportError("Nach der Bereinigung ist keine Zeile übrig.")
 
-    report["rows_saved"] = len(df)
+    report.rows_saved = len(df)
     return df.reset_index(drop=True), report
 
 

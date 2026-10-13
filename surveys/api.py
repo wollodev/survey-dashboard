@@ -1,41 +1,50 @@
 """JSON-API mit Django REST Framework."""
 
-from typing import Any, cast
+from dataclasses import asdict
 
 from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
 from rest_framework.parsers import MultiPartParser
-from rest_framework.views import APIView, Response
+from rest_framework.request import Request
+from rest_framework.response import Response
+from rest_framework.throttling import AnonRateThrottle, ScopedRateThrottle
+from rest_framework.views import APIView
 
-from surveys.analysis import load_survey, summarize
-from surveys.importer import SurveyImportError
-from surveys.models import SurveyUpload
-from surveys.serializers import SurveyUploadSerializer, UploadSerializer
-from surveys.services import create_survey
+from .importer import SurveyImportError
+from .models import SurveyUpload
+from .serializers import SurveyUploadSerializer, UploadSerializer
+from .services import create_survey, get_summary
 
 
 class SurveyListCreateView(APIView):
     """GET /api/surveys/ listet alle Uploads, POST lädt eine neue CSV hoch."""
 
     parser_classes = [MultiPartParser]
+    throttle_scope = "uploads"
 
-    def get(self, request):
+    def get_throttles(self):
+        # Uploads sind teuer und bekommen ein eigenes, strengeres Limit.
+        if self.request.method == "POST":
+            return [ScopedRateThrottle()]
+        return [AnonRateThrottle()]
+
+    def get(self, request: Request) -> Response:
         uploads = SurveyUpload.objects.all()
         return Response(SurveyUploadSerializer(uploads, many=True).data)
 
-    def post(self, request):
+    def post(self, request: Request) -> Response:
         serializer = UploadSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        data = cast(dict[str, Any], serializer.validated_data)
-        csv_file = data["file"]
         try:
-            upload, report = create_survey(csv_file, data.get("name"))
+            upload, report = create_survey(
+                serializer.validated_data["file"], serializer.validated_data.get("name")
+            )
         except SurveyImportError as exc:
             raise ValidationError({"file": [str(exc)]}) from exc
 
         return Response(
-            {"survey": SurveyUploadSerializer(upload).data, "report": report},
+            {"survey": SurveyUploadSerializer(upload).data, "report": asdict(report)},
             status=status.HTTP_201_CREATED,
         )
 
@@ -43,6 +52,6 @@ class SurveyListCreateView(APIView):
 class SurveySummaryView(APIView):
     """GET /api/surveys/<id>/summary/ liefert alle Kennzahlen als JSON."""
 
-    def get(self, request, pk: int):
+    def get(self, request: Request, pk: int) -> Response:
         upload = get_object_or_404(SurveyUpload, pk=pk)
-        return Response(summarize(load_survey(upload.data_path)))
+        return Response(get_summary(upload))

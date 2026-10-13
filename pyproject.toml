@@ -1,7 +1,36 @@
 [tool.ruff]
 line-length = 110
+target-version = "py312"
+extend-exclude = ["*/migrations/*"]
 
 [tool.ruff.lint]
-extend-select = ["I"]
-# Django und DRF erwarten Listen als Klassenattribute (Meta.ordering, fields, parser_classes, ...).
-ignore = ["RUF012"]
+extend-select = [
+    "I",    # Import-Reihenfolge
+    "B",    # typische Fehlerquellen (bugbear)
+    "UP",   # moderne Python-Syntax
+    "SIM",  # Vereinfachungen
+    "DJ",   # Django
+    "PD",   # pandas
+    "RUF",  # ruff-eigene Regeln
+]
+ignore = [
+    # Django und DRF erwarten Listen als Klassenattribute (Meta.ordering, fields, parser_classes, ...).
+    "RUF012",
+    # Gedankenstriche (–) sind in deutschen Texten gewollt.
+    "RUF001",
+    "RUF003",
+]
+
+[tool.mypy]
+python_version = "3.12"
+plugins = ["mypy_django_plugin.main", "mypy_drf_plugin.main"]
+check_untyped_defs = true
+warn_unused_ignores = true
+exclude = ["migrations/"]
+
+[[tool.mypy.overrides]]
+module = ["matplotlib.*"]
+ignore_missing_imports = true
+
+[tool.django-stubs]
+django_settings_module = "config.settings.dev"

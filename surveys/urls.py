@@ -1,8 +1,6 @@
 from django.urls import path
 
-from surveys import views
-
-from . import api
+from . import api, views
 
 urlpatterns = [
     path("api/surveys/", api.SurveyListCreateView.as_view(), name="api_survey_list"),

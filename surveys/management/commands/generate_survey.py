@@ -6,14 +6,17 @@ absichtlich typische Fehler aus echten Umfragen (Dubletten, fehlende Werte,
 Tippfehler, Ausreißer), damit es beim Bereinigen mit pandas etwas zu tun gibt.
 
 Aufruf:
-    python generate_survey.py                 # 75.000 Zeilen nach survey.csv
-    python generate_survey.py --rows 120000 --out gross.csv
+    python manage.py generate_survey                 # 75.000 Zeilen nach survey.csv
+    python manage.py generate_survey --rows 120000 --out gross.csv
 """
 
-import argparse
 import csv
 import random
 from datetime import datetime, timedelta
+
+from django.core.management.base import BaseCommand, CommandParser
+
+from ...schema import COLUMN_TYPES
 
 BRANDS = {
     # Marke: (Anteil, durchschnittliche Zufriedenheit 1–5)
@@ -61,21 +64,7 @@ INCOME_BANDS = {
     "keine Angabe": 0.08,
 }
 
-COLUMNS = [
-    "response_id",
-    "submitted_at",
-    "age",
-    "gender",
-    "region",
-    "income_band",
-    "cups_per_day",
-    "preferred_brand",
-    "channel",
-    "monthly_spend_eur",
-    "satisfaction",
-    "nps_score",
-    "would_subscribe",
-]
+COLUMNS = list(COLUMN_TYPES)
 
 
 def pick(rng: random.Random, weights: dict) -> str:
@@ -167,33 +156,34 @@ def add_noise(rng: random.Random, row: dict) -> dict:
     return row
 
 
-def main() -> None:
-    parser = argparse.ArgumentParser(
-        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
-    )
-    parser.add_argument("--rows", type=int, default=75_000, help="Anzahl Antworten (Standard: 75000)")
-    parser.add_argument("--out", default="survey.csv", help="Zieldatei (Standard: survey.csv)")
-    parser.add_argument("--seed", type=int, default=42, help="Startwert für den Zufall")
-    args = parser.parse_args()
-
-    rng = random.Random(args.seed)
+def write_survey(path: str, rows: int, seed: int) -> int:
+    """Schreibt die Umfrage als CSV und gibt die Anzahl geschriebener Zeilen zurück."""
+    rng = random.Random(seed)
     start = datetime(2026, 3, 2)  # noqa: DTZ001 – ein Montag; die Umfrage speichert Ortszeit ohne Zeitzone
     weights = week_weights(26)  # 26 Wochen, März bis August
 
     written = 0
-    with open(args.out, "w", newline="", encoding="utf-8") as f:
+    with open(path, "w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=COLUMNS)
         writer.writeheader()
-        for i in range(args.rows):
+        for i in range(rows):
             row = add_noise(rng, make_row(rng, 100_001 + i, start, weights))
             writer.writerow(row)
             written += 1
             if rng.random() < 0.005:  # doppelt abgeschickt
                 writer.writerow(row)
                 written += 1
+    return written
 
-    print(f"{written} Zeilen nach {args.out} geschrieben.")
 
+class Command(BaseCommand):
+    help = "Erzeugt eine fiktive Kaffee-Umfrage als CSV (mit absichtlichen Datenfehlern)."
 
-if __name__ == "__main__":
-    main()
+    def add_arguments(self, parser: CommandParser) -> None:
+        parser.add_argument("--rows", type=int, default=75_000, help="Anzahl Antworten (Standard: 75000)")
+        parser.add_argument("--out", default="survey.csv", help="Zieldatei (Standard: survey.csv)")
+        parser.add_argument("--seed", type=int, default=42, help="Startwert für den Zufall")
+
+    def handle(self, *args, rows: int, out: str, seed: int, **options) -> None:
+        written = write_survey(out, rows, seed)
+        self.stdout.write(self.style.SUCCESS(f"{written} Zeilen nach {out} geschrieben."))

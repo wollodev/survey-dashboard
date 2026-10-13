@@ -1,6 +1,7 @@
 """Diagramme mit matplotlib, als PNG-Bytes für den PDF-Bericht."""
 
 import io
+from datetime import date
 
 from matplotlib.figure import Figure
 
@@ -27,22 +28,25 @@ def _style(ax) -> None:
 
 def brand_share_chart(brands: list[dict]) -> bytes:
     """Waagerechte Balken: Anteil der Antworten je Marke."""
+    fig = Figure(figsize=(7, 3), facecolor="white")
+    ax = fig.subplots()
+    _style(ax)
+    if not brands:
+        return _to_png(fig)
+
     names = [b["brand"] for b in brands][::-1]  # größte Marke oben
     shares = [b["share"] for b in brands][::-1]
 
-    fig = Figure(figsize=(7, 3), facecolor="white")
-    ax = fig.subplots()
     bars = ax.barh(names, shares, color=ACCENT)
     ax.bar_label(bars, labels=[f"{s:.1f} %" for s in shares], padding=4, fontsize=9, color=MUTED)
     ax.set_xlabel("Anteil der Antworten in %", fontsize=9, color=MUTED)
     ax.set_xlim(0, max(shares) * 1.2)
-    _style(ax)
     return _to_png(fig)
 
 
 def weekly_chart(weekly: list[dict]) -> bytes:
     """Linie: Antworten pro Woche."""
-    weeks = [f"{w['week'][8:10]}.{w['week'][5:7]}." for w in weekly]  # "2026-03-02" -> "02.03."
+    weeks = [date.fromisoformat(w["week"]).strftime("%d.%m.") for w in weekly]  # "2026-03-02" -> "02.03."
     counts = [w["responses"] for w in weekly]
 
     fig = Figure(figsize=(7, 2.6), facecolor="white")

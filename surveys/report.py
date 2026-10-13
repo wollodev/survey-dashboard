@@ -11,6 +11,7 @@ from reportlab.lib.units import cm
 from reportlab.lib.utils import ImageReader
 from reportlab.platypus import Image, KeepTogether, Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
 
+from .analysis import Summary
 from .charts import brand_share_chart, weekly_chart
 
 LINE = colors.HexColor("#e3e2dd")
@@ -43,7 +44,7 @@ def _chart(png: bytes, width: float) -> Image:
 
 
 def build_report(
-    title: str, uploaded_at: datetime, summary: dict, created_at: datetime | None = None
+    title: str, uploaded_at: datetime, summary: Summary, created_at: datetime | None = None
 ) -> bytes:
     """Baut den Bericht und gibt das fertige PDF als Bytes zurück."""
     created_at = created_at or datetime.now().astimezone()

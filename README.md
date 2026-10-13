@@ -1,5 +1,8 @@
 # Umfrage-Dashboard
 
+> **Demo-Projekt** – zeigt eine kleine, sauber strukturierte Anwendung mit **Python, Django und pandas**.
+> Alle Marken, Personen und Antworten sind erfunden (`python manage.py generate_survey`).
+
 Django-Anwendung zum Hochladen, Bereinigen und Auswerten von Umfrage-CSVs (Kaffeekonsum).
 Die Daten werden mit pandas bereinigt, als Parquet gespeichert und als Dashboard, JSON-API
 und PDF-Bericht ausgegeben.
